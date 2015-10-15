@@ -1,52 +1,146 @@
-Yii 2 Advanced Project Template
-===============================
+Портирование блога из yii1.1.* в yii2
 
-Yii 2 Advanced Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
-developing complex Web applications with multiple tiers.
+- Начало
+    + Установка Yii2 Advanced template
+- Начальное прототипирование
+    + Создание и подключение базы данных
+    + Генерация каркаса
+- Управление записями
+    + Доработка модели Post
+    + 
+- Управление комментариями
 
-The template includes three tiers: front end, back end, and console, each of which
-is a separate Yii application.
+## Начало
+По стандартным рецептам, коих уже много в сети, устанавливаем Advanced template в папку доступную из сети. 
 
-The template is designed to work in a team development environment. It supports
-deploying the application in different environments.
+Напомню основные моменты способа установку для маленьких:
 
-[![Latest Stable Version](https://poser.pugx.org/yiisoft/yii2-app-advanced/v/stable.png)](https://packagist.org/packages/yiisoft/yii2-app-advanced)
-[![Total Downloads](https://poser.pugx.org/yiisoft/yii2-app-advanced/downloads.png)](https://packagist.org/packages/yiisoft/yii2-app-advanced)
-[![Build Status](https://travis-ci.org/yiisoft/yii2-app-advanced.svg?branch=master)](https://travis-ci.org/yiisoft/yii2-app-advanced)
+1. Создать папку для проекта (blog) и распокавать актуальную версию архива шаблона (линк для скачки http://www.yiiframework.com/download)
+2. Инициализировать приложение из командной строки:
+    php init
+    на вопрос варианта установки в режиме разработки можно выбрать опцию под номером 0
+3. Создать базу данных (blog) и подключить к приложению в файле blog/common/config/main-local.php:
+    'db' => [
+        'class' => 'yii\db\Connection',
+        'dsn' => 'mysql:host=localhost;dbname=blog',
+        'username' => 'root',
+        'password' => 'yourpassword',
+        'charset' => 'utf8',
+        'table_prefix' => 'tbl_',
+    ],
+4. Запустить миграцию создания таблиц базы днных:
+    yii migrate
+5. Убедиться что проект готов к дальнейшему расширению:
+    http://localhost/blog/frontend/web
 
-DIRECTORY STRUCTURE
--------------------
+6. Создаем таблицы для нашего блока из готовой модели yii 1.1.*(находится где-то здесь yii/demos/blog/protected/data). Перед тем как запустить sql необходимо сделать поправки:
+-  убрать префикс tbl_,
+-  исключить таблицу tbl_user, так как в шаблоне advanced уже есть из коробки модель User
+-  сделать соответственные поправки в создании внешних ключей в таблицах post и comments:
 
-```
-common
-    config/              contains shared configurations
-    mail/                contains view files for e-mails
-    models/              contains model classes used in both backend and frontend
-console
-    config/              contains console configurations
-    controllers/         contains console controllers (commands)
-    migrations/          contains database migrations
-    models/              contains console-specific model classes
-    runtime/             contains files generated during runtime
-backend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains backend configurations
-    controllers/         contains Web controller classes
-    models/              contains backend-specific model classes
-    runtime/             contains files generated during runtime
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
-frontend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains frontend configurations
-    controllers/         contains Web controller classes
-    models/              contains frontend-specific model classes
-    runtime/             contains files generated during runtime
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
-    widgets/             contains frontend widgets
-vendor/                  contains dependent 3rd-party packages
-environments/            contains environment-based overrides
-tests                    contains various tests for the advanced application
-    codeception/         contains tests developed with Codeception PHP Testing Framework
-```
+    CREATE TABLE lookup
+    (
+        id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(128) NOT NULL,
+        code INTEGER NOT NULL,
+        type VARCHAR(128) NOT NULL,
+        position INTEGER NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+    CREATE TABLE post
+    (
+        id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        title VARCHAR(128) NOT NULL,
+        content TEXT NOT NULL,
+        tags TEXT,
+        status INTEGER NOT NULL,
+        create_time INTEGER,
+        update_time INTEGER,
+        author_id INTEGER NOT NULL,
+        CONSTRAINT FK_post_author FOREIGN KEY (author_id)
+            REFERENCES user (id) ON DELETE CASCADE ON UPDATE RESTRICT
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+    CREATE TABLE comment
+    (
+        id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        content TEXT NOT NULL,
+        status INTEGER NOT NULL,
+        create_time INTEGER,
+        author VARCHAR(128) NOT NULL,
+        email VARCHAR(128) NOT NULL,
+        url VARCHAR(128),
+        post_id INTEGER NOT NULL,
+        CONSTRAINT FK_comment_post FOREIGN KEY (post_id)
+            REFERENCES post (id) ON DELETE CASCADE ON UPDATE RESTRICT
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+    CREATE TABLE tag
+    (
+        id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(128) NOT NULL,
+        frequency INTEGER DEFAULT 1
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+     
+
+7. Создаем модели наших таблиц и сгенерируем коды операций CRUD. Для этого запускаем генератор gii в backend -e:
+    http://localhost/blog/backend/web/index.php?r=gii
+
+    Соответственно заполняем поля:
+    Table Name:
+    *
+    Namespace:
+    common\models
+
+    Жмём [Preview] и убираем галочку с создания модели Migration.php она нам не понадобиться, убедившись что не отмечен пункт overwrite модели User.php жмём на далее [Generate]
+
+    В результате у нас получиться в папке common\models следующие модели:
+    common/models/Comment.php
+    common/models/Lookup.php
+    common/models/Post.php
+    common/models/Tag.php 
+
+    После того, как были созданы классы модели, мы можем использовать Crud Generator для генерации кода операций CRUD для них. Сделаем это в backend -е, так как CRUD  - это операция для админки. Создадим CRUD моделей Post и Comment. 
+    Для Post:
+    Model Class:
+    common\models\Post
+    Search Model Class:
+    common\models\PostSearch
+    Controller Class:
+    backend\controllers\PostController
+
+    Для Comment:
+    Model Class
+    common\models\Comment
+    Search Model Class
+    common\models\CommentSearch
+    Controller Class
+    backend\controllers\CommentController
+
+    Если заглянете в папку backend/views то увидите, что сгенерированны представления для post и comment контроллеров в одноименные папки.
+
+8. Вы, возможно, заметили, что каркас приложения advanced уже реализует аутентификацию, происходящюю посредством таблицы User БД. 
+9. Доработка модели Post 
+    Изменение метода rules()
+
+    Изменение метода relations() 
+
+    Добавляем свойство url 
+
+    Текстовое представление для статуса 
+10. Создание и редактирование записей 
+    Настройка правил доступа 
+
+    Правки в действиях create и update 
+
+
+
+
+
+
+
+
+
+
+
