@@ -130,9 +130,59 @@
 
     Текстовое представление для статуса 
 10. Создание и редактирование записей 
-    Настройка правил доступа 
+
+    Настройка правил доступа
+
+    'access' => [
+                    'class' => AccessControl::className(),
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
 
     Правки в действиях create и update 
+
+    Для начала изменим файл _form.php таким образом, чтобы форма собирала только нужные нам данные: title, content, tags и status. Для первых трёх атрибутов мы используем текстовые поля. Для status — выпадающий список с всеми возможными состояниями записи: 
+     <?= $form->field($model, 'status')->dropDownList(Lookup::items('PostStatus'),['prompt'=>'Select...']) ?>
+     В приведённом коде для получения списка статусов используется вызов Lookup::items('PostStatus'). 
+
+     Далее изменим класс Post таким образом, чтобы он автоматически выставлял некоторые атрибуты (такие, как create_time и author_id) непосредственно перед сохранением записи в БД.
+
+     'timestamp' => [
+                        'class' => TimestampBehavior::className(),
+                        'attributes' => [
+                            ActiveRecord::EVENT_BEFORE_INSERT => ['create_time', 'update_time'],
+                            ActiveRecord::EVENT_BEFORE_UPDATE => ['update_time'],
+                        ],
+                    ],
+                    [
+                        'class' => BlameableBehavior::className(),
+                        'createdByAttribute' => 'author_id',
+                        'updatedByAttribute' => 'author_id',
+                    ],
+
+    При сохранении записи мы хотим также обновить информацию о частоте использования тегов в таблице tbl_tag. Мы можем реализовать это в методе afterSave(), который автоматически вызывается после успешного сохранения записи в БД. 
+
+11. Отображение записей 
+    Изменение действия index 
+    Изменение действия view
+
+12. Управление записями
+13. Управление комментариями
+    
+    Доработка модели Comment 
+    
+    Изменение метода rules() 
+
+    Изменение метода attributeLabels() 
+
+    Создание и отображение комментариев 
+    
+
+
 
 
 

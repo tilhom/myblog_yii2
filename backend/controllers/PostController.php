@@ -101,6 +101,15 @@ class PostController extends Controller
         }
     }
 
+    public function actionTest()
+    {
+        $t=\common\models\Tag::find()->where(['name'=>'yii'])->exists();
+        if($t)
+            {
+                echo 'Add tag!';
+            }
+    }
+
     /**
      * Deletes an existing Post model.
      * If deletion is successful, the browser will be redirected to the 'index' page.

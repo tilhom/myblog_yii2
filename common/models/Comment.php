@@ -3,6 +3,10 @@
 namespace common\models;
 
 use Yii;
+use yii\db\ActiveRecord;
+use yii\behaviors\TimestampBehavior;
+use yii\behaviors\BlameableBehavior;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "comment".
@@ -37,10 +41,13 @@ class Comment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['content', 'status', 'author', 'email', 'post_id'], 'required'],
-            [['content'], 'string'],
-            [['status', 'create_time', 'post_id'], 'integer'],
-            [['author', 'email', 'url'], 'string', 'max' => 128]
+        [['content', 'author', 'email'], 'required'],
+        [['author', 'email', 'url'], 'string', 'max' => 128],
+        ['email','email'],
+        [['content'], 'string'],
+        ['url','url'],
+        //[['status', 'create_time', 'post_id'], 'integer'],
+
         ];
     }
 
@@ -50,14 +57,26 @@ class Comment extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'content' => 'Content',
-            'status' => 'Status',
-            'create_time' => 'Create Time',
-            'author' => 'Author',
-            'email' => 'Email',
-            'url' => 'Url',
-            'post_id' => 'Post ID',
+        'id' => 'ID',
+        'content' => 'Comment',
+        'status' => 'Status',
+        'create_time' => 'Create Time',
+        'author' => 'Name',
+        'email' => 'Email',
+        'url' => 'Website',
+        'post_id' => 'Post',
+        ];
+    }
+
+    public function behaviors(){
+        return [
+        'timestamp' => [
+        'class' => TimestampBehavior::className(),
+        'attributes' => [
+        ActiveRecord::EVENT_BEFORE_INSERT => ['create_time'],
+            //ActiveRecord::EVENT_BEFORE_UPDATE => ['update_time'],
+        ],
+        ]   
         ];
     }
 
@@ -68,4 +87,37 @@ class Comment extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Post::className(), ['id' => 'post_id']);
     }
+
+    /**
+     * Approves a comment.
+     */
+    public function approve()
+    {
+        $this->status=Comment::STATUS_APPROVED;
+        $this->update(array('status'));
+    }
+
+        /**
+     * @param Post the post that this comment belongs to. If null, the method
+     * will query for the post.
+     * @return string the permalink URL for this comment
+     */
+        public function getUrl($post=null)
+        {
+            if($post===null)
+                $post=$this->post;
+            return $post->url.'#c'.$this->id;
+        }
+
+    /**
+     * @return string the hyperlink display for the current comment's author
+     */
+    public function getAuthorLink()
+    {
+        if(!empty($this->url))
+            return Html::a(Html::encode($this->author),$this->url);
+        else
+            return Html::encode($this->author);
+    }
+
 }
