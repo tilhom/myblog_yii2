@@ -105,7 +105,14 @@ class Post extends \yii\db\ActiveRecord
 
     public function getCommentCount()
     {
-        return $this->hasMany(Comment::className(), ['post_id' => 'id'])->count();
+        return $this->hasMany(Comment::className(), 
+            ['post_id' => 'id'])->where(['status'=>Comment::STATUS_APPROVED])->count();
+    }
+
+    public function getAllCommentCount()
+    {
+        return $this->hasMany(Comment::className(), 
+            ['post_id' => 'id'])->where(['status'=>Comment::STATUS_APPROVED])->count();
     }
 
     /**

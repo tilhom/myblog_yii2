@@ -1,5 +1,4 @@
 <?php
-
 namespace common\models;
 
 use Yii;
@@ -46,7 +45,7 @@ class Comment extends \yii\db\ActiveRecord
         ['email','email'],
         [['content'], 'string'],
         ['url','url'],
-        //[['status', 'create_time', 'post_id'], 'integer'],
+        [['status', 'create_time', 'post_id'], 'integer'],
 
         ];
     }
@@ -94,7 +93,7 @@ class Comment extends \yii\db\ActiveRecord
     public function approve()
     {
         $this->status=Comment::STATUS_APPROVED;
-        $this->update(array('status'));
+        $this->update(['status']);
     }
 
         /**

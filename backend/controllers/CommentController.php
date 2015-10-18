@@ -1,5 +1,4 @@
 <?php
-
 namespace backend\controllers;
 
 use Yii;
@@ -9,6 +8,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 
 /**
  * CommentController implements the CRUD actions for Comment model.
@@ -111,6 +111,16 @@ class CommentController extends Controller
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    public function actionApprove($id)
+    {
+        $comment=$this->findModel($id);
+        $comment->approve();
+        return $this->redirect(['index']);
+        //Yii::$app->response->redirect(array('index'));
+        // Url::toRoute([Url::previous()]);
+        //Yii::$app->request->referrer;
     }
 
     /**

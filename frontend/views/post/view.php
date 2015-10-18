@@ -21,23 +21,18 @@ $this->params['breadcrumbs'][] = $this->title;
         <h4>
             <?php echo $model->commentCount>1 ? $model->commentCount . ' comments' : 'One comment'; ?>
         </h4>
-
+    
         <?php echo $this->context->renderPartial('_comments',array(
             'post'=>$model,
             'comments'=>$model->comments,
         )); ?>
     <?php endif; ?>
 
-    
-    <?php if(Yii::$app->session->hasFlash('commentSubmitted')): ?>
-        <div class="flash-success">
-            <?php echo Yii::$app->session->getFlash('commentSubmitted'); ?>
-        </div>
-    <?php else: ?>
         <?php echo $this->context->renderPartial('/comment/_form',array(
             'model'=>$comment,
         )); ?>
-    <?php endif; ?>
+   
+
 
 </div><!-- comments -->
 

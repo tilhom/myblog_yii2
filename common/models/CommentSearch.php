@@ -41,7 +41,7 @@ class CommentSearch extends Comment
      */
     public function search($params)
     {
-        $query = Comment::find();
+        $query = Comment::find()->orderBy('create_time DESC');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

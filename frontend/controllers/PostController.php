@@ -51,7 +51,15 @@ class PostController extends Controller
     public function actionView($id)
     {
         $model = $this->findModel($id);
-        $comment=$this->newComment($model);
+        //$comment=$this->newComment($model);
+        $comment=new Comment();
+        if($comment->load($_POST) && $model->addComment($comment))
+            {
+                if($comment->status==Comment::STATUS_PENDING){
+                    Yii::$app->getSession()->setFlash('warning','Thank you for your comment. Your comment will be posted once it is approved.');
+                }
+                return $this->refresh();
+            }
         return $this->render('view',array(
             'model'=>$model,
             'comment'=>$comment,
@@ -82,15 +90,28 @@ class PostController extends Controller
         }
     }
 
-    protected function newComment($post)
+/*    protected function newComment($post)
     {
         $comment=new Comment();
         if($comment->load($_POST) && $post->addComment($comment))
         {
-            if($comment->status==Comment::STATUS_PENDING)
-                Yii::$app->session->setFlash('commentSubmitted','Thank you for your comment. Your comment will be posted once it is approved.');
-            Yii::$app->response->refresh();
+            if($comment->status==Comment::STATUS_PENDING){
+                Yii::$app->getSession()->setFlash('commentSubmitted','Thank you for your comment. Your comment will be posted once it is approved.');
+                $s=Yii::$app->session->getFlash('commentSubmitted');
+                print('<pre>'); var_dump($s);print('<pre>');die; 
+            }
+            //return Yii::$app->response->refresh();
+            return $this->refresh();
+
+            //$this->redirect(\Yii::$app->request->getReferrer());
         }
         return $comment;
     }
+
+     public function actionTest()
+    {
+        $t=Yii::$app->params['commentNeedApproval'];
+        var_dump($t);
+    }
+*/
 }

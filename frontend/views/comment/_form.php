@@ -4,7 +4,7 @@ use \yii\widgets\ActiveForm;
 ?>
 
 
-<div class="panel panel-info">
+<div class="panel panel-success">
 	<div class="panel-heading">
 		<h3 class="panel-title">Leave a Comment</h3>
 	</div>
@@ -15,7 +15,7 @@ use \yii\widgets\ActiveForm;
 		<?php echo $form->field($model,'url')->textInput(); ?>
 		<?php echo $form->field($model,'content')->textArea(array('rows'=>6, 'cols'=>50)); ?>
 		<div class="form-actions text-center">
-			<?php echo Html::submitButton('Save',['class' => 'btn btn-primary btn-block']); ?>
+			<?php echo Html::submitButton('Save',['class' => 'btn btn-success btn-block']); ?>
 		</div>
 
 		<?php ActiveForm::end(); ?>
