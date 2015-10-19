@@ -119,4 +119,16 @@ class Comment extends \yii\db\ActiveRecord
             return Html::encode($this->author);
     }
 
+    /**
+     * @param integer the maximum number of comments that should be returned
+     * @return array the most recently added comments
+     */
+    public static function findRecentComments($limit=10)
+    {
+        return static::find()->where('status='.self::STATUS_APPROVED)
+                    ->orderBy('create_time DESC')
+                    ->limit($limit)
+                    ->with('post')->all();
+    }
+
 }

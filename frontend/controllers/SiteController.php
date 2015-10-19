@@ -21,6 +21,8 @@ class SiteController extends Controller
     /**
      * @inheritdoc
      */
+    public $layout='column1';
+
     public function behaviors()
     {
         return [

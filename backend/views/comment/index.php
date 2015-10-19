@@ -16,9 +16,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <p>
-        <?= Html::a('Create Comment', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -33,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
            [
                 'attribute'=>'status',
                 'format'=>'raw',
-                'value'=>function ($model, $key, $index, $column){
+                'value'=>function ($model){
                     $text=\common\models\Lookup::item('CommentStatus',$model->status);
                     $url=Url::to(["comment/approve","id"=>$model->id]);
                     Url::remember();

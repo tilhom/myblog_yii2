@@ -16,6 +16,8 @@ use yii\filters\VerbFilter;
  */
 class PostController extends Controller
 {
+    public $layout='column2';
+
     public function behaviors()
     {
         return [
@@ -50,6 +52,7 @@ class PostController extends Controller
      */
     public function actionView($id)
     {
+        $this->layout='column1';
         $model = $this->findModel($id);
         //$comment=$this->newComment($model);
         $comment=new Comment();
